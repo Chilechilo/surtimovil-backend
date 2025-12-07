@@ -59,3 +59,46 @@ export const getCategoryByName = async (req, res) => {
     res.status(500).json({ success: false, message: "Unexpected server error" });
   }
 };
+
+// POST /api/categories
+export const createCategory = async (req, res) => {
+  try {
+    const { name, category, categoryName } = req.body;
+
+    // Aceptamos varios nombres para ser flexibles con el front
+    const finalName = (name || category || categoryName || "").trim();
+
+    if (!finalName) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Category name is required" });
+    }
+
+    // ¿Ya existe una categoría con ese nombre?
+    const existing = await Category.findOne({ category: finalName });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Category already exists" });
+    }
+
+    // Buscar el último id para asignar el siguiente
+    const last = await Category.findOne().sort({ id: -1 });
+    const nextId = last ? last.id + 1 : 1;
+
+    const newCategory = await Category.create({
+      id: nextId,
+      category: finalName,
+    });
+
+    return res.status(201).json({
+      success: true,
+      category: newCategory,
+    });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Unexpected server error" });
+  }
+};
