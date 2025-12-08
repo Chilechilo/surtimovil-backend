@@ -65,7 +65,6 @@ export const createCategory = async (req, res) => {
   try {
     const { name, category, categoryName } = req.body;
 
-    // Aceptamos varios nombres para ser flexibles con el front
     const finalName = (name || category || categoryName || "").trim();
 
     if (!finalName) {
@@ -74,7 +73,7 @@ export const createCategory = async (req, res) => {
         .json({ success: false, message: "Category name is required" });
     }
 
-    // ¿Ya existe una categoría con ese nombre?
+    // Ver si ya existe
     const existing = await Category.findOne({ category: finalName });
     if (existing) {
       return res
@@ -82,7 +81,7 @@ export const createCategory = async (req, res) => {
         .json({ success: false, message: "Category already exists" });
     }
 
-    // Buscar el último id para asignar el siguiente
+    // Sacar el último id para continuar la secuencia
     const last = await Category.findOne().sort({ id: -1 });
     const nextId = last ? last.id + 1 : 1;
 

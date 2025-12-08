@@ -3,10 +3,10 @@ import {
   getAllCategories, 
   getCategoryById,
   getCategoryByName,
-  createCategory      // 👈 NUEVO
+  createCategory
 } from "../controllers/categoryController.js";
-import { verifyToken } from "../middlewares/authMiddleware.js";    // 👈 NUEVO
-import { verifyAdminOnly } from "../middlewares/roleMiddleware.js"; // 👈 NUEVO
+import { verifyToken } from "../middlewares/authMiddleware.js";
+import { verifyAdminOnly } from "../middlewares/roleMiddleware.js";
 
 const router = express.Router();
 
@@ -16,6 +16,6 @@ router.get("/:id", getCategoryById);
 router.get("/name/:categoryName", getCategoryByName);
 
 // Rutas sólo admin
-router.post("/", verifyToken, verifyAdminOnly, createCategory);   // 👈 NUEVA
+router.post("/", verifyToken, verifyAdminOnly, createCategory);
 
 export default router;
