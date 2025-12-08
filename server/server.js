@@ -21,7 +21,30 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "5mb", type: "*/*" }));
+app.use(
+  express.json({
+    limit: "10mb",
+    strict: false,
+    type: (req) => {
+      const ct = req.headers["content-type"] || "";
+      return (
+        ct.includes("application/json") ||
+        ct.includes("application/") ||
+        ct.includes("json") ||
+        true //
+      );
+    },
+  })
+);
+
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "10mb",
+    type: "*/*",
+  })
+);
+
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 app.use((req, res, next) => {
