@@ -3,7 +3,7 @@ import Product from "../models/Product.js";
 import crypto from "crypto";
 
 const handleError = (res, err) => {
-  console.error(err);
+  console.error("🔥 [orderController] Error:", err);
   return res.status(500).json({
     success: false,
     message: "Server error",
@@ -28,6 +28,9 @@ export const createOrder = async (req, res) => {
     const userId = getUserIdFromReq(req);
     const { items } = req.body;
 
+    console.log("🧾 [createOrder] Body recibido:", JSON.stringify(req.body));
+    console.log("🧾 [createOrder] userId:", userId);
+
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -42,8 +45,26 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const productIds = items.map((i) => i.productId);
+    // Normalizamos productId a número, tanto si viene como 1 o como "1"
+    const productIdsRaw = items.map((i) => i.productId);
+    const productIds = productIdsRaw
+      .map((v) => Number(v))
+      .filter((n) => !Number.isNaN(n));
+
+    console.log("🔎 productIds raw:", productIdsRaw);
+    console.log("🔎 productIds normalizados:", productIds);
+
+    if (!productIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid productIds in order items",
+      });
+    }
+
+    // Buscar por el campo id numérico (como ya lo hacías)
     const products = await Product.find({ id: { $in: productIds } });
+
+    console.log("✅ Productos encontrados:", products.length);
 
     if (!products.length) {
       return res.status(400).json({
@@ -56,15 +77,24 @@ export const createOrder = async (req, res) => {
     let total = 0;
 
     for (const item of items) {
-      const product = products.find((p) => p.id === item.productId);
-      if (!product) continue;
+      const pid = Number(item.productId);
+      if (Number.isNaN(pid)) {
+        console.log("⚠️ productId inválido en item:", item);
+        continue;
+      }
+
+      const product = products.find((p) => Number(p.id) === pid);
+      if (!product) {
+        console.log("⚠️ No se encontró producto para productId:", pid);
+        continue;
+      }
 
       const quantity = Number(item.quantity) || 1;
       const price = Number(product.price) || 0;
       const subtotal = price * quantity;
 
       itemsWithData.push({
-        productId: product.id,
+        productId: product.id, // sigue siendo el id lógico numérico
         name: product.name,
         price,
         quantity,
@@ -97,6 +127,8 @@ export const createOrder = async (req, res) => {
       qrCode,
       qrRedeemed: false,
     });
+
+    console.log("✅ Pedido creado:", newOrder._id);
 
     return res.status(201).json({
       success: true,
@@ -139,7 +171,7 @@ export const getAllOrders = async (req, res) => {
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
-  return res.json({
+    return res.json({
       success: true,
       orders,
     });
