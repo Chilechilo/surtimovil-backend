@@ -23,112 +23,78 @@ const getUserIdFromReq = (req) =>
 
 // POST /api/orders
 // body: { items: [{ productId, quantity }] }
+// POST /api/orders
 export const createOrder = async (req, res) => {
   try {
     const userId = getUserIdFromReq(req);
     const { items } = req.body;
 
-    console.log("🧾 [createOrder] body:", JSON.stringify(req.body));
+    console.log("🧾 [createOrder] body:", req.body);
 
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "User not authenticated",
-      });
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Order must have at least one item",
-      });
-    }
-
-    // Tomar los productId y convertirlos a número
-    const productIds = items
-      .map((i) => Number(i.productId))
-      .filter((n) => !Number.isNaN(n));
-
-    console.log("🔢 productIds (num):", productIds);
-
-    if (!productIds.length) {
-      return res.status(400).json({
-        success: false,
-        message: "No valid productIds in order items",
-      });
-    }
-
-    // Buscar productos por su campo "id" numérico
-    const products = await Product.find({ id: { $in: productIds } });
-
-    console.log("✅ Productos encontrados:", products.length);
-
-    if (!products.length) {
-      return res.status(400).json({
-        success: false,
-        message: "No valid products found for this order",
-      });
+      return res.status(400).json({ success: false, message: "Order must have at least one item" });
     }
 
     const itemsWithData = [];
     let total = 0;
 
     for (const item of items) {
-      const pidNum = Number(item.productId);
-      const product = products.find(
-        (p) => Number(p.id) === pidNum
-      );
+      let product = null;
 
-      if (!product) {
-        console.log("⚠️ No se encontró producto para productId:", item.productId);
-        continue;
+      // 1️⃣ Intentar buscar por _id
+      if (typeof item.productId === "string" && item.productId.length > 10) {
+        product = await Product.findById(item.productId);
       }
 
-      const quantity = Number(item.quantity) || 1;
-      const price = Number(product.price) || 0;
-      const subtotal = price * quantity;
+      // 2️⃣ Intentar buscar por id numérico
+      if (!product && !isNaN(Number(item.productId))) {
+        product = await Product.findOne({ id: Number(item.productId) });
+      }
+
+      if (!product) {
+        console.log("⚠ Producto no encontrado:", item.productId);
+        return res.status(400).json({
+          success: false,
+          message: `Product not found: ${item.productId}`,
+        });
+      }
+
+      const qty = Number(item.quantity) || 1;
+      const subtotal = qty * Number(product.price);
 
       itemsWithData.push({
-        productId: product.id, // usamos el id lógico numérico
+        productId: product.id,
         name: product.name,
-        price,
-        quantity,
+        price: product.price,
+        quantity: qty,
         subtotal,
       });
 
       total += subtotal;
     }
 
-    if (itemsWithData.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No valid items to create order",
-      });
-    }
-
-    // siguiente número de pedido
-    const lastOrder = await Order.findOne().sort({ orderNumber: -1 });
-    const nextOrderNumber = lastOrder ? lastOrder.orderNumber + 1 : 1;
-
-    // QR generado por defecto
-    const qrCode = generateQrCodeValue();
+    const last = await Order.findOne().sort({ orderNumber: -1 });
+    const next = last ? last.orderNumber + 1 : 1;
 
     const newOrder = await Order.create({
       user: userId,
-      orderNumber: nextOrderNumber,
+      orderNumber: next,
       items: itemsWithData,
       total,
       status: "pending",
-      qrCode,
+      qrCode: generateQrCodeValue(),
       qrRedeemed: false,
     });
-
-    console.log("✅ Pedido creado:", newOrder._id);
 
     return res.status(201).json({
       success: true,
       order: newOrder,
     });
+
   } catch (err) {
     return handleError(res, err);
   }
