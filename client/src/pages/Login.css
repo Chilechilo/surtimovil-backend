@@ -1,0 +1,90 @@
+/* Fondo general */
+.login-container {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Tarjeta */
+.login-card {
+    width: 420px;
+    padding: 40px;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Título principal */
+.login-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #d36c47;
+    margin-bottom: 10px;
+}
+
+/* Subtítulo */
+.login-subtitle {
+    font-size: 20px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+/* Etiquetas */
+.login-label {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    text-align: left;
+    margin-bottom: 6px;
+}
+
+/* Inputs */
+.login-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* Botón */
+.login-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #d36c47;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.login-button:hover {
+    background-color: #b95739;
+}
+
+/* Registro */
+.register-text {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #444;
+}
+
+.register-link {
+    color: #d36c47;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.register-link:hover {
+    text-decoration: underline;
+}

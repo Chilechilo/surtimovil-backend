@@ -1,7 +1,8 @@
-.env
+server/node_modules
+client/node_modules
 
-node_modules/
-npm-debug.log
+client/dist
+
+server/.env
 
 .DS_Store
-Thumbs.db

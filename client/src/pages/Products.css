@@ -1,0 +1,189 @@
+/* Contenedor general de la página */
+.page {
+  min-height: 100vh;
+  padding: 24px 40px;
+  background: #f5f5f5;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Filtros (categoría + búsqueda) */
+.page-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.catalog-select,
+.catalog-search {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 0.9rem;
+  min-width: 190px;
+}
+
+.catalog-search {
+  min-width: 240px;
+}
+
+/* Estados (cargando, error, sin resultados) */
+.state-box {
+  margin-top: 40px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  color: #444;
+}
+
+.state-error {
+  border: 1px solid #ff6b6b;
+  color: #b00020;
+}
+
+.state-box button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #ff6b6b;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #eee;
+  border-top-color: #ff6b6b;
+  margin: 0 auto 8px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Grid de productos */
+.products-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 18px;
+}
+
+/* Tarjeta de producto (coincide con el estilo del catálogo Android) */
+.product-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.product-image-wrapper {
+  width: 100%;
+  height: 150px;
+  border-radius: 14px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.product-info {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* “Etiqueta” de categoría */
+.product-category {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ffe9d7;
+  color: #c95a12;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Nombre acotado a 2 líneas, similar a las cards de la app */
+.product-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.2;
+  max-height: 2.4em;      /* 2 líneas aprox */
+  overflow: hidden;
+}
+
+/* Precio + botón carrito al fondo de la card */
+.product-bottom {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  color: #ff6b00;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.product-add-btn {
+  border: none;
+  border-radius: 999px;
+  background: #ff6b00;
+  color: white;
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.product-add-btn:hover {
+  background: #e35600;
+}
