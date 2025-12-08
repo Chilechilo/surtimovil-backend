@@ -169,3 +169,4 @@ export const deleteProduct = async (req, res) => {
     handleError(res, err);
   }
 };
+
