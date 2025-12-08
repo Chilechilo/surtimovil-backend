@@ -13,24 +13,34 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "5mb" }));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.use(express.json({ limit: "5mb", type: "*/*" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 app.use((req, res, next) => {
   console.log("📨 REQUEST:", req.method, req.originalUrl);
-  console.log("📦 BODY RECIBIDO:", req.body);
+  console.log("📦 HEADERS:", req.headers);
+  console.log("📦 RAW BODY:", req.body);
   next();
 });
 
-// Conexión DB
+// Conectar DB
 connectDB();
 
+// Rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/orders", orderRoutes);
 
+// Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🔥 Server running on port ${PORT}`));
