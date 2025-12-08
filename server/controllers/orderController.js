@@ -45,24 +45,48 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Normalizamos productId a número, tanto si viene como 1 o como "1"
+    // Tomamos todos los productId tal como llegan
     const productIdsRaw = items.map((i) => i.productId);
-    const productIds = productIdsRaw
-      .map((v) => Number(v))
-      .filter((n) => !Number.isNaN(n));
 
     console.log("🔎 productIds raw:", productIdsRaw);
-    console.log("🔎 productIds normalizados:", productIds);
 
-    if (!productIds.length) {
+    // Intentar interpretarlos como números (para el campo id)
+    const numericIds = productIdsRaw
+      .map((v) => {
+        const n = Number(v);
+        return Number.isNaN(n) ? null : n;
+      })
+      .filter((v) => v !== null);
+
+    // También tenerlos como strings (para _id de Mongo)
+    const stringIds = productIdsRaw
+      .map((v) => (v !== null && v !== undefined ? String(v) : null))
+      .filter((v) => v !== null);
+
+    console.log("🔢 numericIds:", numericIds);
+    console.log("🧬 stringIds:", stringIds);
+
+    const orConditions = [];
+    if (numericIds.length) {
+      // Para productos que usan un campo "id" numérico
+      orConditions.push({ id: { $in: numericIds } });
+    }
+    if (stringIds.length) {
+      // Para productos donde "productId" corresponde a _id de Mongo
+      orConditions.push({ _id: { $in: stringIds } });
+    }
+
+    if (!orConditions.length) {
       return res.status(400).json({
         success: false,
         message: "No valid productIds in order items",
       });
     }
 
-    // Buscar por el campo id numérico (como ya lo hacías)
-    const products = await Product.find({ id: { $in: productIds } });
+    const query =
+      orConditions.length === 1 ? orConditions[0] : { $or: orConditions };
+
+    const products = await Product.find(query);
 
     console.log("✅ Productos encontrados:", products.length);
 
@@ -77,15 +101,24 @@ export const createOrder = async (req, res) => {
     let total = 0;
 
     for (const item of items) {
-      const pid = Number(item.productId);
-      if (Number.isNaN(pid)) {
-        console.log("⚠️ productId inválido en item:", item);
-        continue;
-      }
+      const rawPid = item.productId;
 
-      const product = products.find((p) => Number(p.id) === pid);
+      // Intentamos matchear tanto por id numérico como por _id string
+      const pidNum = Number(rawPid);
+      const product = products.find((p) => {
+        // Coincidencia por "id" numérico
+        if (!Number.isNaN(pidNum) && Number(p.id) === pidNum) {
+          return true;
+        }
+        // Coincidencia por "_id" (Mongo ObjectId)
+        if (String(p._id) === String(rawPid)) {
+          return true;
+        }
+        return false;
+      });
+
       if (!product) {
-        console.log("⚠️ No se encontró producto para productId:", pid);
+        console.log("⚠️ No se encontró producto para productId:", rawPid);
         continue;
       }
 
@@ -94,7 +127,8 @@ export const createOrder = async (req, res) => {
       const subtotal = price * quantity;
 
       itemsWithData.push({
-        productId: product.id, // sigue siendo el id lógico numérico
+        // Guardamos el id lógico numérico si existe, si no, el _id
+        productId: product.id ?? product._id,
         name: product.name,
         price,
         quantity,
