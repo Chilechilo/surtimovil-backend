@@ -1,102 +1,127 @@
 import { useEffect, useState } from "react";
+import { API_BASE } from "../apiConfig";
+
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  return d.toLocaleString("es-MX", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
+function statusLabel(status) {
+  switch (status) {
+    case "pending":
+      return "Pendiente";
+    case "delivered":
+      return "Entregado";
+    case "canceled":
+      return "Cancelado";
+    default:
+      return status;
+  }
+}
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    try {
-      const userRaw = localStorage.getItem("user");
-      let userKey = "guest";
-
-      if (userRaw) {
-        const u = JSON.parse(userRaw);
-        userKey = u._id || u.id || u.email || "guest";
-      }
-
-      const rawOrders = localStorage.getItem(`orders_${userKey}`);
-      const parsed = rawOrders ? JSON.parse(rawOrders) : [];
-      setOrders(parsed);
-    } catch (err) {
-      console.error("Error leyendo pedidos de localStorage", err);
+    if (!user || !token) {
+      setLoading(false);
+      setError("Debes iniciar sesión para ver tus pedidos.");
+      return;
     }
-  }, []);
 
-  const formatCurrency = (value) =>
-    new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(value ?? 0);
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  const formatDate = (iso) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return d.toLocaleString("es-MX", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
-  };
+        const resp = await fetch(`${API_BASE}/orders/my`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok || data.success === false) {
+          throw new Error(data.message || "Error al obtener tus pedidos");
+        }
+
+        setOrders(data.orders || []);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "No se pudieron cargar los pedidos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [user, token]);
 
   return (
     <section className="page">
       <header className="page-header">
         <div>
-          <h1>Pedidos</h1>
+          <h1>Mis pedidos</h1>
           <p className="page-subtitle">
-            Historial de pedidos confirmados desde el carrito.
+            Historial de pedidos realizados con tu cuenta.
           </p>
         </div>
       </header>
 
-      {!orders.length && (
+      {loading && (
         <div className="state-box">
-          <p>
-            Aún no has realizado pedidos en este dispositivo. Finaliza un
-            pedido desde el carrito para verlo aquí.
-          </p>
+          <p>Cargando pedidos...</p>
         </div>
       )}
 
-      {orders.length > 0 && (
-        <div className="orders-history">
-          {orders.map((order, index) => {
-            const itemsCount = order.items?.reduce(
-              (sum, it) => sum + (it.quantity || 0),
-              0
-            );
+      {!loading && error && (
+        <div className="state-box state-error">
+          <p>{error}</p>
+        </div>
+      )}
 
-            return (
-              <div key={order.id} className="orders-history-item">
-                <div className="orders-history-header">
-                  <div>
-                    <div className="orders-history-title">
-                      Pedido #{index + 1}
-                    </div>
-                    <div className="orders-history-date">
-                      {formatDate(order.createdAt)}
-                    </div>
-                  </div>
+      {!loading && !error && orders.length === 0 && (
+        <div className="state-box">
+          <p>No has realizado ningún pedido todavía.</p>
+        </div>
+      )}
 
-                  <div className="orders-history-summary">
-                    <div>{itemsCount} producto(s)</div>
-                    <div>{formatCurrency(order.total)}</div>
-                  </div>
-                </div>
-
-                {Array.isArray(order.items) && order.items.length > 0 && (
-                  <ul className="orders-history-items">
-                    {order.items.map((it, i) => (
-                      <li key={i}>
-                        <span>
-                          {it.name} x {it.quantity}
-                        </span>
-                        <span>{formatCurrency(it.price)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
+      {!loading && !error && orders.length > 0 && (
+        <div className="state-box">
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th># Pedido</th>
+                  <th>Estado</th>
+                  <th>Total</th>
+                  <th>Fecha</th>
+                  <th>Artículos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((o) => (
+                  <tr key={o._id}>
+                    <td>{o.orderNumber}</td>
+                    <td>{statusLabel(o.status)}</td>
+                    <td>${o.total?.toFixed?.(2) ?? o.total}</td>
+                    <td>{formatDate(o.createdAt)}</td>
+                    <td>{o.items?.length || 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </section>

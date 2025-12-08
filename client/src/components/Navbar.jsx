@@ -61,7 +61,7 @@ export default function Navbar() {
 
         {/* Carrito (siempre visible) */}
         <Link className={isActive("/cart") ? "active" : ""} to="/cart">
-          🛒 Carrito
+          Carrito
           {cartCount > 0 && (
             <span className="cart-badge">{cartCount}</span>
           )}
