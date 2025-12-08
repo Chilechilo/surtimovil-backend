@@ -28,15 +28,18 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
-    if (!user || !token) {
+    const rawUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    // Si no hay sesión, mostramos mensaje y listo
+    if (!rawUser || !token) {
       setLoading(false);
       setError("Debes iniciar sesión para ver tus pedidos.");
       return;
     }
+
+    let cancelled = false;
 
     const loadOrders = async () => {
       try {
@@ -49,23 +52,43 @@ export default function Orders() {
           },
         });
 
-        const data = await resp.json();
+        // Leemos como texto primero para evitar crashear si viene HTML
+        const text = await resp.text();
+        let data = {};
+
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            throw new Error("Respuesta inesperada del servidor");
+          }
+        }
 
         if (!resp.ok || data.success === false) {
           throw new Error(data.message || "Error al obtener tus pedidos");
         }
 
-        setOrders(data.orders || []);
+        if (!cancelled) {
+          setOrders(data.orders || []);
+        }
       } catch (err) {
         console.error(err);
-        setError(err.message || "No se pudieron cargar los pedidos");
+        if (!cancelled) {
+          setError(err.message || "No se pudieron cargar los pedidos");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadOrders();
-  }, [user, token]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []); // <-- sólo se ejecuta una vez al montar
 
   return (
     <section className="page">
