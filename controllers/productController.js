@@ -89,26 +89,36 @@ export const getProductByCategoryAndId = async (req, res) => {
 // Crear producto
 export const createProduct = async (req, res) => {
   try {
-    const { category, id, name, price, image } = req.body;
+    const { category, name, price, image } = req.body;
 
-    const existing = await Product.findOne({ id, category });
-    if (existing) {
+    if (!category || !name || price == null) {
       return res.status(400).json({
         success: false,
-        message: "Product already exists in this category"
+        message: "Category, name and price are required"
       });
     }
 
+    const priceNumber = Number(price);
+    if (Number.isNaN(priceNumber) || priceNumber < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Price must be a valid number"
+      });
+    }
+
+    // Sacar el último producto para calcular el siguiente id
+    const lastProduct = await Product.findOne().sort({ id: -1 });
+    const nextId = lastProduct ? lastProduct.id + 1 : 1;
+
     const product = await Product.create({
+      id: nextId,
       category,
-      id,
       name,
-      price,
+      price: priceNumber,
       image
     });
 
     res.status(201).json({ success: true, product });
-
   } catch (err) {
     handleError(res, err);
   }
