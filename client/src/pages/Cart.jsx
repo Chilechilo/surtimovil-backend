@@ -12,6 +12,8 @@ export default function Cart() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
   const token = localStorage.getItem("token");
 
+  const numericTotal = Number(total) || 0;
+
   const handleCreateOrder = async () => {
     setError("");
     setSuccess("");
@@ -21,7 +23,7 @@ export default function Cart() {
       return;
     }
 
-    if (items.length === 0) {
+    if (!items.length) {
       setError("Tu carrito está vacío.");
       return;
     }
@@ -45,7 +47,20 @@ export default function Cart() {
         body: JSON.stringify(payload),
       });
 
-      const data = await resp.json();
+      const contentType = resp.headers.get("content-type") || "";
+      let data;
+
+      if (contentType.includes("application/json")) {
+        data = await resp.json();
+      } else {
+        const text = await resp.text();
+        throw new Error(
+          `Respuesta no válida del servidor (${resp.status}): ${text.slice(
+            0,
+            80
+          )}...`
+        );
+      }
 
       if (!resp.ok || data.success === false) {
         throw new Error(data.message || "Error al crear el pedido");
@@ -72,38 +87,49 @@ export default function Cart() {
         </div>
       </header>
 
-      {items.length === 0 && (
+      {/* Carrito vacío */}
+      {!items.length && (
         <div className="state-box">
           <p>Tu carrito está vacío.</p>
         </div>
       )}
 
+      {/* Carrito con items */}
       {items.length > 0 && (
         <div className="state-box">
           <ul className="cart-list">
-            {items.map((item) => (
-              <li key={item.id} className="cart-item">
-                <div>
-                  <div className="cart-item-name">{item.name}</div>
-                  <div className="cart-item-meta">
-                    Cantidad: {item.quantity} · Precio: ${item.price}
+            {items.map((item) => {
+              const price = Number(item.price || 0);
+              const qty = Number(item.quantity || 0);
+              const subtotal = price * qty;
+
+              return (
+                <li key={item.id} className="cart-item">
+                  <div>
+                    <div className="cart-item-name">{item.name}</div>
+                    <div className="cart-item-meta">
+                      Cantidad: {qty} · Precio: ${price.toFixed(2)}
+                    </div>
                   </div>
-                </div>
-                <div className="cart-item-actions">
-                  <div className="cart-item-subtotal">
-                    {(item.price * item.quantity).toFixed(2)}
+                  <div className="cart-item-actions">
+                    <div className="cart-item-subtotal">
+                      {subtotal.toFixed(2)}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.id)}
+                    >
+                      Quitar
+                    </button>
                   </div>
-                  <button type="button" onClick={() => removeFromCart(item.id)}>
-                    Quitar
-                  </button>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           <div className="cart-summary">
             <div className="cart-total">
-              Total: <strong>${total.toFixed(2)}</strong>
+              Total: <strong>${numericTotal.toFixed(2)}</strong>
             </div>
             <button
               type="button"

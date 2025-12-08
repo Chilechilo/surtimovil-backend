@@ -13,11 +13,19 @@ const handleError = (res, err) => {
 
 const generateQrCodeValue = () => crypto.randomBytes(8).toString("hex");
 
+// Helper para obtener el id del usuario desde el request
+const getUserIdFromReq = (req) =>
+  req.userId ||
+  req.user?._id ||
+  req.user?.id ||
+  req.user?.userId ||
+  null;
+
 // POST /api/orders
 // body: { items: [{ productId, quantity }] }
 export const createOrder = async (req, res) => {
   try {
-    const userId = req.userId; // viene del authMiddleware
+    const userId = getUserIdFromReq(req);
     const { items } = req.body;
 
     if (!userId) {
@@ -102,7 +110,14 @@ export const createOrder = async (req, res) => {
 // GET /api/orders/my  (pedidos del usuario logueado)
 export const getMyOrders = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = getUserIdFromReq(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
 
     const orders = await Order.find({ user: userId })
       .sort({ createdAt: -1 })
@@ -124,7 +139,7 @@ export const getAllOrders = async (req, res) => {
       .populate("user", "name email")
       .sort({ createdAt: -1 });
 
-    return res.json({
+  return res.json({
       success: true,
       orders,
     });
@@ -136,7 +151,7 @@ export const getAllOrders = async (req, res) => {
 // GET /api/orders/:id  (dueño o admin)
 export const getOrderById = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = getUserIdFromReq(req);
     const { id } = req.params;
 
     const order = await Order.findById(id).populate("user", "name email");
@@ -148,7 +163,7 @@ export const getOrderById = async (req, res) => {
       });
     }
 
-    const isOwner = order.user._id.toString() === userId;
+    const isOwner = userId && order.user._id.toString() === String(userId);
     const isAdmin = req.userRole === "admin" || req.isAdmin === true;
 
     if (!isOwner && !isAdmin) {
@@ -234,8 +249,15 @@ export const generateOrderQrCode = async (req, res) => {
 // POST /api/orders/scan-qr  (usuario escanea QR)
 export const confirmDeliveryByQr = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = getUserIdFromReq(req);
     const { qrCode } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
 
     if (!qrCode) {
       return res.status(400).json({
@@ -253,7 +275,7 @@ export const confirmDeliveryByQr = async (req, res) => {
       });
     }
 
-    if (order.user.toString() !== userId) {
+    if (order.user.toString() !== String(userId)) {
       return res.status(403).json({
         success: false,
         message: "This QR does not belong to the current user",

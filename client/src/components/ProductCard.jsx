@@ -1,11 +1,12 @@
-// src/components/ProductCard.jsx
-import { useCart } from "../context/CartContext";
+import { useState } from "react";
+import { useCart } from "../context/CartContext.jsx";
 
 export default function ProductCard({ product }) {
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
 
   const name = product.name || product.nombre || "Producto";
-  const price = product.price ?? product.precio ?? 0;
+  const price = Number(product.price ?? product.precio ?? 0);
   const image = product.image || product.imagen;
   const category = product.category || product.categoria;
 
@@ -13,11 +14,12 @@ export default function ProductCard({ product }) {
     new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
-    }).format(value);
+    }).format(Number(value) || 0);
 
   const handleAdd = () => {
-    addItem(product);
-    alert(`"${name}" agregado al carrito`);
+    addToCart(product);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
   };
 
   return (
@@ -39,8 +41,13 @@ export default function ProductCard({ product }) {
 
         <div className="product-bottom">
           <span className="product-price">{formatPrice(price)}</span>
-          <button className="product-add-btn" onClick={handleAdd}>
-            🛒
+
+          <button
+            type="button"
+            className="product-add-btn"
+            onClick={handleAdd}
+          >
+            {added ? "✓ Agregado" : "🛒 Agregar"}
           </button>
         </div>
       </div>
