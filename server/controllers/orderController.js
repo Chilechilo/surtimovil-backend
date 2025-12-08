@@ -22,14 +22,10 @@ const getUserIdFromReq = (req) =>
   null;
 
 // POST /api/orders
-// body: { items: [{ productId, quantity }] }
-// POST /api/orders
 export const createOrder = async (req, res) => {
   try {
     const userId = getUserIdFromReq(req);
     const { items } = req.body;
-
-    console.log("🧾 [createOrder] body:", req.body);
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -45,60 +41,59 @@ export const createOrder = async (req, res) => {
     for (const item of items) {
       let product = null;
 
-      // 1️⃣ Intentar buscar por _id
+      // 1️⃣ Primero intentar como ObjectId
       if (typeof item.productId === "string" && item.productId.length > 10) {
         product = await Product.findById(item.productId);
       }
 
-      // 2️⃣ Intentar buscar por id numérico
+      // 2️⃣ Si no, intentar como id numérico
       if (!product && !isNaN(Number(item.productId))) {
         product = await Product.findOne({ id: Number(item.productId) });
       }
 
       if (!product) {
-        console.log("⚠ Producto no encontrado:", item.productId);
         return res.status(400).json({
           success: false,
           message: `Product not found: ${item.productId}`,
         });
       }
 
-      const qty = Number(item.quantity) || 1;
-      const subtotal = qty * Number(product.price);
+      const quantity = Number(item.quantity) || 1;
+      const price = Number(product.price);
+      const subtotal = quantity * price;
 
       itemsWithData.push({
         productId: product.id,
         name: product.name,
-        price: product.price,
-        quantity: qty,
+        price,
+        quantity,
         subtotal,
       });
 
       total += subtotal;
     }
 
-    const last = await Order.findOne().sort({ orderNumber: -1 });
-    const next = last ? last.orderNumber + 1 : 1;
+    const lastOrder = await Order.findOne().sort({ orderNumber: -1 });
+    const nextOrder = lastOrder ? lastOrder.orderNumber + 1 : 1;
 
     const newOrder = await Order.create({
       user: userId,
-      orderNumber: next,
+      orderNumber: nextOrder,
       items: itemsWithData,
       total,
       status: "pending",
-      qrCode: generateQrCodeValue(),
+      qrCode: crypto.randomBytes(8).toString("hex"),
       qrRedeemed: false,
     });
 
-    return res.status(201).json({
-      success: true,
-      order: newOrder,
-    });
+    return res.status(201).json({ success: true, order: newOrder });
 
   } catch (err) {
-    return handleError(res, err);
+    console.error("createOrder error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // GET /api/orders/my  (pedidos del usuario logueado)
 export const getMyOrders = async (req, res) => {
