@@ -28,8 +28,7 @@ export const createOrder = async (req, res) => {
     const userId = getUserIdFromReq(req);
     const { items } = req.body;
 
-    console.log("🧾 [createOrder] Body recibido:", JSON.stringify(req.body));
-    console.log("🧾 [createOrder] userId:", userId);
+    console.log("🧾 [createOrder] body:", JSON.stringify(req.body));
 
     if (!userId) {
       return res.status(401).json({
@@ -45,48 +44,22 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Tomamos todos los productId tal como llegan
-    const productIdsRaw = items.map((i) => i.productId);
+    // Tomar los productId y convertirlos a número
+    const productIds = items
+      .map((i) => Number(i.productId))
+      .filter((n) => !Number.isNaN(n));
 
-    console.log("🔎 productIds raw:", productIdsRaw);
+    console.log("🔢 productIds (num):", productIds);
 
-    // Intentar interpretarlos como números (para el campo id)
-    const numericIds = productIdsRaw
-      .map((v) => {
-        const n = Number(v);
-        return Number.isNaN(n) ? null : n;
-      })
-      .filter((v) => v !== null);
-
-    // También tenerlos como strings (para _id de Mongo)
-    const stringIds = productIdsRaw
-      .map((v) => (v !== null && v !== undefined ? String(v) : null))
-      .filter((v) => v !== null);
-
-    console.log("🔢 numericIds:", numericIds);
-    console.log("🧬 stringIds:", stringIds);
-
-    const orConditions = [];
-    if (numericIds.length) {
-      // Para productos que usan un campo "id" numérico
-      orConditions.push({ id: { $in: numericIds } });
-    }
-    if (stringIds.length) {
-      // Para productos donde "productId" corresponde a _id de Mongo
-      orConditions.push({ _id: { $in: stringIds } });
-    }
-
-    if (!orConditions.length) {
+    if (!productIds.length) {
       return res.status(400).json({
         success: false,
         message: "No valid productIds in order items",
       });
     }
 
-    const query =
-      orConditions.length === 1 ? orConditions[0] : { $or: orConditions };
-
-    const products = await Product.find(query);
+    // Buscar productos por su campo "id" numérico
+    const products = await Product.find({ id: { $in: productIds } });
 
     console.log("✅ Productos encontrados:", products.length);
 
@@ -101,24 +74,13 @@ export const createOrder = async (req, res) => {
     let total = 0;
 
     for (const item of items) {
-      const rawPid = item.productId;
-
-      // Intentamos matchear tanto por id numérico como por _id string
-      const pidNum = Number(rawPid);
-      const product = products.find((p) => {
-        // Coincidencia por "id" numérico
-        if (!Number.isNaN(pidNum) && Number(p.id) === pidNum) {
-          return true;
-        }
-        // Coincidencia por "_id" (Mongo ObjectId)
-        if (String(p._id) === String(rawPid)) {
-          return true;
-        }
-        return false;
-      });
+      const pidNum = Number(item.productId);
+      const product = products.find(
+        (p) => Number(p.id) === pidNum
+      );
 
       if (!product) {
-        console.log("⚠️ No se encontró producto para productId:", rawPid);
+        console.log("⚠️ No se encontró producto para productId:", item.productId);
         continue;
       }
 
@@ -127,8 +89,7 @@ export const createOrder = async (req, res) => {
       const subtotal = price * quantity;
 
       itemsWithData.push({
-        // Guardamos el id lógico numérico si existe, si no, el _id
-        productId: product.id ?? product._id,
+        productId: product.id, // usamos el id lógico numérico
         name: product.name,
         price,
         quantity,
