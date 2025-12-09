@@ -1,0 +1,31 @@
+.home-page {
+  background: linear-gradient(to bottom, #fff7f3, #ffffff);
+  padding: 30px;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e96a3a;
+}
+
+.home-subtitle {
+  font-size: 1rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+.home-user-card {
+  margin-top: 22px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0px 6px 14px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.home-user-card p {
+  margin: 6px 0;
+  color: #333;
+  font-size: 1rem;
+}

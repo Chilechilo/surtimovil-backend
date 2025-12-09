@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { API_BASE } from "../apiConfig";
+import "./Orders.css";
 
 function formatDate(dateStr) {
   if (!dateStr) return "-";
@@ -32,7 +33,6 @@ export default function Orders() {
     const rawUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
-    // Si no hay sesión, mostramos mensaje y listo
     if (!rawUser || !token) {
       setLoading(false);
       setError("Debes iniciar sesión para ver tus pedidos.");
@@ -47,19 +47,16 @@ export default function Orders() {
         setError("");
 
         const resp = await fetch(`${API_BASE}/orders/my`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Leemos como texto primero para evitar crashear si viene HTML
         const text = await resp.text();
         let data = {};
 
         if (text) {
           try {
             data = JSON.parse(text);
-          } catch (e) {
+          } catch {
             throw new Error("Respuesta inesperada del servidor");
           }
         }
@@ -73,80 +70,66 @@ export default function Orders() {
         }
       } catch (err) {
         console.error(err);
-        if (!cancelled) {
-          setError(err.message || "No se pudieron cargar los pedidos");
-        }
+        if (!cancelled) setError(err.message);
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadOrders();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []); // <-- sólo se ejecuta una vez al montar
+    return () => (cancelled = true);
+  }, []);
 
   return (
-    <section className="page">
-      <header className="page-header">
-        <div>
-          <h1>Mis pedidos</h1>
-          <p className="page-subtitle">
-            Historial de pedidos realizados con tu cuenta.
-          </p>
-        </div>
+    <section className="orders-page">
+      <header className="orders-header">
+        <h1>Mis pedidos</h1>
+        <p>Historial de pedidos realizados con tu cuenta.</p>
       </header>
 
       {loading && (
-        <div className="state-box">
+        <div className="orders-state">
           <p>Cargando pedidos...</p>
         </div>
       )}
 
       {!loading && error && (
-        <div className="state-box state-error">
+        <div className="orders-state error">
           <p>{error}</p>
         </div>
       )}
 
       {!loading && !error && orders.length === 0 && (
-        <div className="state-box">
+        <div className="orders-state">
           <p>No has realizado ningún pedido todavía.</p>
         </div>
       )}
 
-      {!loading && !error && orders.length > 0 && (
-        <div className="state-box">
-          <div className="admin-table-wrapper">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th># Pedido</th>
-                  <th>Estado</th>
-                  <th>Total</th>
-                  <th>Fecha</th>
-                  <th>Artículos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => (
-                  <tr key={o._id}>
-                    <td>{o.orderNumber}</td>
-                    <td>{statusLabel(o.status)}</td>
-                    <td>${o.total?.toFixed?.(2) ?? o.total}</td>
-                    <td>{formatDate(o.createdAt)}</td>
-                    <td>{o.items?.length || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* TARJETAS */}
+      <div className="orders-grid">
+        {orders.map((o) => (
+          <div className="order-card" key={o._id}>
+            <div className="order-card-header">
+              <span className="order-number">Pedido #{o.orderNumber}</span>
+              <span className={`order-status ${o.status}`}>
+                {statusLabel(o.status)}
+              </span>
+            </div>
+
+            <div className="order-info">
+              <p>
+                <strong>Total:</strong> ${o.total?.toFixed?.(2)}
+              </p>
+              <p>
+                <strong>Fecha:</strong> {formatDate(o.createdAt)}
+              </p>
+              <p>
+                <strong>Artículos:</strong> {o.items?.length || 0}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </section>
   );
 }

@@ -30,6 +30,8 @@ export function CartProvider({ children }) {
     }
   }, [items]);
 
+
+  // ➕ Agregar producto al carrito
   const addToCart = (product) => {
     setItems((current) => {
       const id = product.id ?? product._id;
@@ -51,18 +53,39 @@ export function CartProvider({ children }) {
           id,
           name: product.name || product.nombre || "Producto",
           price: Number(product.price ?? product.precio ?? 0),
+          image: product.image || product.img || "",   // 👈 soporte de imagen
           quantity: 1,
         },
       ];
     });
   };
 
+
+  // ❌ Quitar producto
   const removeFromCart = (id) => {
     setItems((current) => current.filter((it) => it.id !== id));
   };
 
+
+  // 🔄 Actualizar cantidad (+ y –)
+  const updateQuantity = (id, newQty) => {
+    setItems((current) =>
+      current
+        .map((it) =>
+          it.id === id
+            ? { ...it, quantity: Math.max(1, newQty) } // evita cero o negativos
+            : it
+        )
+        .filter((it) => it.quantity > 0) // si llega a 0 lo elimina
+    );
+  };
+
+
+  // 🧼 Vaciar carrito
   const clearCart = () => setItems([]);
 
+
+  // 💰 Total
   const total = items.reduce(
     (sum, item) =>
       sum +
@@ -70,9 +93,17 @@ export function CartProvider({ children }) {
     0
   );
 
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, clearCart, total }}
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        updateQuantity,   // 👈 muy importante
+        total,
+      }}
     >
       {children}
     </CartContext.Provider>

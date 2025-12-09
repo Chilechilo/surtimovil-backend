@@ -1,66 +1,49 @@
 .offers-page {
-  padding: 20px 32px 32px;
+  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  background: linear-gradient(to bottom, #fff7f3, #ffffff);
 }
 
-.offers-header {
-  margin-bottom: 24px;
-}
-
+/* Título */
 .offers-header h1 {
-  font-size: 1.9rem;
-  margin: 0 0 4px;
-  color: #222;
+  color: #e96a3a;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .offers-header p {
-  margin: 0;
-  color: #666;
+  color: #444;
+  margin-top: 4px;
 }
 
-.offers-state,
-.offers-error {
-  margin-top: 40px;
-  text-align: center;
-  font-size: 1rem;
-}
-
-.offers-error {
-  color: #b00020;
-}
-
-.offers-highlight {
-  margin-bottom: 32px;
-}
-
+/* Secciones */
 .offers-highlight h2,
 .offers-all h2 {
+  margin-top: 18px;
   font-size: 1.3rem;
-  margin-bottom: 12px;
+  color: #222;
+  font-weight: 600;
+}
+
+/* Grid */
+.offers-grid {
+  display: grid;
+  gap: 18px;
+  margin-top: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}
+
+/* Mensajes */
+.offers-state {
+  margin-top: 40px;
+  text-align: center;
   color: #333;
 }
 
-.offers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-/* Sección "todos los productos" */
-.offers-all {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-}
-
-/* Responsive simple */
-@media (max-width: 768px) {
-  .offers-page {
-    padding: 16px;
-  }
-
-  .offers-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
+.offers-error {
+  margin-top: 40px;
+  text-align: center;
+  color: #c62828;
+  font-weight: 600;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./Home.css";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -52,67 +53,18 @@ export default function Home() {
     }).format(value ?? 0);
 
   return (
-    <section className="page">
-      <header className="page-header">
-        <div>
-          <h1>Bienvenido a SurtiMovil</h1>
-          <p className="page-subtitle">
-            Panel general de tu actividad. Más adelante aquí se integrarán
-            métricas de Big Data del proyecto.
-          </p>
-        </div>
-      </header>
+    <section className="page home-page">
+  <header className="page-header">
+    <h1 className="home-title">Bienvenido a SurtiMovil</h1>
+    <p className="home-subtitle">Tu sistema de pedidos y catálogo para tiendas.</p>
+  </header>
 
-      {/* Info de usuario */}
-      {user && (
-        <div className="state-box">
-          <p>
-            <strong>Usuario:</strong>{" "}
-            {user.name || user.nombre || user.email}
-          </p>
-          {user.email && (
-            <p>
-              <strong>Correo:</strong> {user.email}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Dashboard / Reportes (placeholder) */}
-      <section className="reports-grid">
-        <div className="report-card">
-          <h3>Pedidos realizados (local)</h3>
-          <p className="report-value">{totalOrders}</p>
-        </div>
-
-        <div className="report-card">
-          <h3>Productos totales en pedidos</h3>
-          <p className="report-value">{totalItems}</p>
-        </div>
-
-        <div className="report-card">
-          <h3>Ingresos estimados</h3>
-          <p className="report-value">{formatCurrency(totalRevenue)}</p>
-        </div>
-
-        <div className="report-card">
-          <h3>Métrica Big Data</h3>
-          <p className="report-value">Placeholder</p>
-          <p style={{ fontSize: "0.8rem", marginTop: "0.5rem" }}>
-            Aquí se mostrarán métricas calculadas con técnicas de Big Data.
-          </p>
-        </div>
-      </section>
-
-      {/* Mensaje si aún no hay pedidos */}
-      {!orders.length && (
-        <div className="state-box">
-          <p>
-            Aún no has generado pedidos en este dispositivo. Haz un pedido
-            desde el carrito para ver datos aquí.
-          </p>
-        </div>
-      )}
-    </section>
+  {user && (
+    <div className="home-user-card">
+      <p><strong>👤 Nombre:</strong> {user.name || user.nombre}</p>
+      <p><strong>📧 Correo:</strong> {user.email}</p>
+    </div>
+  )}
+  </section>
   );
 }

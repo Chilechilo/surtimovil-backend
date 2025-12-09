@@ -1,16 +1,16 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: #f9fafb;
-  background-color: #111827;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --sm-primary: #e96a3a;
+  --sm-primary-dark: #d45528;
+  --sm-primary-light: #ffe1d3;
+  --sm-bg: #fff7f3;
+  --sm-surface: #ffffff;
+  --sm-text: #1f2933;
+  --sm-text-muted: #6b7280;
+  --sm-border-soft: rgba(15, 23, 42, 0.06);
+  --sm-error: #ef4444;
+  --sm-radius-lg: 18px;
+  --sm-radius-md: 12px;
+  --sm-shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.06);
 }
 
 *,
@@ -19,330 +19,42 @@
   box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--sm-bg);
+  color: var(--sm-text);
+}
+
 a {
-  font-weight: 500;
-  color: #6366f1;
+  color: inherit;
   text-decoration: none;
 }
 
-a:hover {
-  color: #818cf8;
+button {
+  font-family: inherit;
 }
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #111827;
-  color: #f9fafb;
-}
-
-/* Para que la app ocupe toda la pantalla */
-#root {
-  min-height: 100vh;
-}
-
-/* ====== LAYOUT GENERAL DE SURTIMOVIL ====== */
-
-.sm-app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header / Navbar */
-.sm-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #020617;
-  color: #f9fafb;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #1e293b;
-}
-
-.sm-logo {
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-/* Menú de navegación */
-.sm-nav {
-  display: flex;
-  gap: 1rem;
-}
-
-.sm-nav a {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.95rem;
-  color: #cbd5f5;
-}
-
-.sm-nav a:hover {
-  color: #ffffff;
-}
-
-.sm-nav a.active {
-  font-weight: 600;
-  text-decoration: underline;
-}
-
-/* Badge del carrito */
-.cart-badge {
-  min-width: 18px;
-  height: 18px;
-  font-size: 0.75rem;
-  border-radius: 999px;
-  padding: 0 6px;
-  background: #ef4444;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Contenido principal */
-.sm-main {
-  flex: 1;
-  padding: 1rem 1.5rem 2rem;
-}
-
-/* ====== ESTILOS GENERALES DE PÁGINAS ====== */
 
 .page {
-  max-width: 1100px;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, var(--sm-bg), #ffffff);
+}
+
+.page-inner {
+  max-width: 1200px;
   margin: 0 auto;
-  padding-top: 1.25rem;
+  padding: 32px 24px 48px;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 1rem;
-}
-
-.page-header h1 {
-  margin: 0;
-  font-size: 1.8rem;
+.page-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--sm-text);
 }
 
 .page-subtitle {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: #9ca3af;
-}
-
-/* Cajas de estado (mensajes, info, errores) */
-.state-box {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.6);
-}
-
-.state-box p {
-  margin: 0;
-}
-
-.state-box.state-error {
-  background: #7f1d1d;
-}
-
-/* ====== DASHBOARD / REPORTES EN HOME ====== */
-
-.reports-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin: 1rem 0 1.5rem;
-}
-
-.report-card {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.6);
-}
-
-.report-card h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  color: #e5e7eb;
-}
-
-.report-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-/* ====== HISTORIAL DE PEDIDOS ====== */
-
-.orders-history {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.orders-history-item {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 0.9rem 1rem;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.6);
-}
-
-.orders-history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.orders-history-title {
-  font-weight: 600;
-}
-
-.orders-history-date {
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
-.orders-history-summary {
-  text-align: right;
-  font-size: 0.9rem;
-}
-
-.orders-history-items {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 0.5rem;
-}
-
-.orders-history-items li {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-
-/* ====== BOTONES GENÉRICOS (por si no hay estilos locales) ====== */
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1d4ed8;
-  color: #f9fafb;
-  cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-
-button:hover {
-  border-color: #93c5fd;
-  background-color: #2563eb;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 3px solid #93c5fd;
-  outline-offset: 2px;
-}
-
-/* Mantén el modo claro de Vite por compatibilidad, pero sin romper layout */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #0f172a;
-    background-color: #f1f5f9;
-  }
-
-  body {
-    background-color: #f1f5f9;
-    color: #0f172a;
-  }
-
-  .sm-header {
-    background: #0f172a;
-  }
-
-  .state-box,
-  .report-card,
-  .orders-history-item {
-    background: #ffffff;
-    color: #0f172a;
-  }
-}
-
-.orders-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.orders-item {
-  background: #020617;
-  border-radius: 0.75rem;
-  padding: 0.75rem 0.9rem;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.6);
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.orders-item-main {
-  flex: 1;
-}
-
-.orders-item-name {
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-}
-
-.orders-item-price,
-.orders-item-subtotal {
-  font-size: 0.85rem;
-  color: #9ca3af;
-}
-
-.orders-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.orders-item-actions input[type="number"] {
-  width: 55px;
-  padding: 0.25rem 0.4rem;
-  border-radius: 0.5rem;
-  border: 1px solid #4b5563;
-  background: #020617;
-  color: #f9fafb;
-}
-
-.orders-item-actions button {
-  padding: 0.35rem 0.6rem;
-  font-size: 0.85rem;
-}
-
-.orders-remove {
-  background: #b91c1c;
-}
-
-.orders-remove:hover {
-  background: #dc2626;
-}
-
-/* Botones de acción abajo del carrito */
-.orders-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
+  font-size: 1rem;
+  color: var(--sm-text-muted);
+  margin-bottom: 32px;
 }

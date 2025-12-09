@@ -1,0 +1,71 @@
+/* === Navbar general === */
+.sm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sm-logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e96a3a;
+}
+
+/* === Links === */
+.sm-nav a {
+  margin: 0 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: 0.2s ease;
+}
+
+.sm-nav a:hover {
+  background: rgba(233, 106, 58, 0.1);
+}
+
+.sm-nav .active {
+  color: #e96a3a;
+  font-weight: 700;
+}
+
+/* === Botón cerrar sesión === */
+.nav-logout {
+  padding: 8px 18px;
+  margin-left: 12px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 20px;
+  background: #e96a3a;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0px 4px 10px rgba(233, 106, 58, 0.3);
+  transition: 0.25s ease;
+}
+
+.nav-logout:hover {
+  background: #cc562d;
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 14px rgba(233, 106, 58, 0.45);
+}
+
+/* Badge carrito */
+.cart-badge {
+  background: #e96a3a;
+  color: white;
+  padding: 3px 7px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  margin-left: 6px;
+}

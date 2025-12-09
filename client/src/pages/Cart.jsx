@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext.jsx";
 import { API_BASE } from "../apiConfig";
+import "./Cart.css";
 
 export default function Cart() {
-  const { items, total, removeFromCart, clearCart } = useCart();
+  const { items, total, removeFromCart, clearCart, updateQuantity } = useCart();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,20 +48,7 @@ export default function Cart() {
         body: JSON.stringify(payload),
       });
 
-      const contentType = resp.headers.get("content-type") || "";
-      let data;
-
-      if (contentType.includes("application/json")) {
-        data = await resp.json();
-      } else {
-        const text = await resp.text();
-        throw new Error(
-          `Respuesta no válida del servidor (${resp.status}): ${text.slice(
-            0,
-            80
-          )}...`
-        );
-      }
+      const data = await resp.json();
 
       if (!resp.ok || data.success === false) {
         throw new Error(data.message || "Error al crear el pedido");
@@ -77,14 +65,10 @@ export default function Cart() {
   };
 
   return (
-    <section className="page">
+    <section className="page cart-page">
       <header className="page-header">
-        <div>
-          <h1>Carrito</h1>
-          <p className="page-subtitle">
-            Revisa los productos antes de confirmar tu pedido.
-          </p>
-        </div>
+        <h1>Carrito</h1>
+        <p>Revisa los productos antes de confirmar tu pedido.</p>
       </header>
 
       {/* Carrito vacío */}
@@ -96,56 +80,65 @@ export default function Cart() {
 
       {/* Carrito con items */}
       {items.length > 0 && (
-        <div className="state-box">
-          <ul className="cart-list">
-            {items.map((item) => {
-              const price = Number(item.price || 0);
-              const qty = Number(item.quantity || 0);
-              const subtotal = price * qty;
+        <div className="cart-container">
+          {items.map((item) => {
+            const price = Number(item.price || 0);
+            const qty = Number(item.quantity || 0);
+            const subtotal = price * qty;
 
-              return (
-                <li key={item.id} className="cart-item">
-                  <div>
-                    <div className="cart-item-name">{item.name}</div>
-                    <div className="cart-item-meta">
-                      Cantidad: {qty} · Precio: ${price.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className="cart-item-actions">
-                    <div className="cart-item-subtotal">
-                      {subtotal.toFixed(2)}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      Quitar
+            return (
+              <div key={item.id} className="cart-card">
+                <img
+                  src={item.image || "/placeholder.png"}
+                  alt={item.name}
+                  className="cart-card-img"
+                />
+
+                <div className="cart-card-info">
+                  <h3>{item.name}</h3>
+                  <p className="cart-card-price">${price.toFixed(2)}</p>
+
+                  <div className="cart-qty-controls">
+                    <button onClick={() => updateQuantity(item.id, qty - 1)}>
+                      –
+                    </button>
+                    <span>{qty}</span>
+                    <button onClick={() => updateQuantity(item.id, qty + 1)}>
+                      +
                     </button>
                   </div>
-                </li>
-              );
-            })}
-          </ul>
 
+                  <p className="cart-subtotal">
+                    Subtotal: <strong>${subtotal.toFixed(2)}</strong>
+                  </p>
+
+                  <button
+                    className="cart-remove-btn"
+                    onClick={() => removeFromCart(item.id)}
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Totales */}
           <div className="cart-summary">
-            <div className="cart-total">
-              Total: <strong>${numericTotal.toFixed(2)}</strong>
-            </div>
+            <h2>Total</h2>
+            <p className="cart-total">${numericTotal.toFixed(2)}</p>
+
             <button
-              type="button"
+              className="cart-submit-btn"
               onClick={handleCreateOrder}
               disabled={loading}
             >
               {loading ? "Creando pedido..." : "Finalizar pedido"}
             </button>
-          </div>
 
-          {error && (
-            <p style={{ color: "#fecaca", marginTop: "0.5rem" }}>{error}</p>
-          )}
-          {success && (
-            <p style={{ color: "#bbf7d0", marginTop: "0.5rem" }}>{success}</p>
-          )}
+            {error && <p className="cart-error">{error}</p>}
+            {success && <p className="cart-success">{success}</p>}
+          </div>
         </div>
       )}
     </section>

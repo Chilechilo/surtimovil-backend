@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
+import "./Navbar.css";
+
 
 function getCurrentUser() {
   const raw = localStorage.getItem("user");
